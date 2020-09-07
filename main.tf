@@ -27,7 +27,7 @@ module "vpc" {
   cidr = "10.0.0.0/22"
 
   azs             = ["sa-east-1a", "sa-east-1b", "sa-east-1c"]
-  private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  public_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
 
   tags = {
     Terraform = "true"
@@ -42,7 +42,7 @@ resource "aws_security_group" "allow_ssh" {
 
   ingress {
     description = "Allow SSH"
-    from_port   = 0
+    from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
@@ -60,7 +60,7 @@ resource "aws_security_group" "allow_tcp" {
 
   ingress {
     description = "Allow HTTP"
-    from_port   = 0
+    from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
@@ -68,7 +68,7 @@ resource "aws_security_group" "allow_tcp" {
 
   ingress {
     description = "Allow HTTPs"
-    from_port   = 0
+    from_port   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
@@ -85,5 +85,5 @@ resource "aws_instance" "example" {
   vpc_security_group_ids = [module.vpc.default_security_group_id,
                             aws_security_group.allow_ssh.id,
                             aws_security_group.allow_tcp.id]
-  subnet_id              = module.vpc.private_subnets[0]
+  subnet_id              = module.vpc.public_subnets[0]
 }
