@@ -15,3 +15,9 @@ variable "security_groups" {
         "vpc_security_group_ids" = ["sg-402e5431"]
     }
 }
+
+variable "key_pair" {
+    type = string
+
+    default = "my-key"
+}
