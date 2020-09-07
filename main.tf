@@ -20,13 +20,6 @@ provider "aws" {
   region  = "sa-east-1"
 }
 
-resource "aws_instance" "example" {
-  ami                    = var.host["ami"]
-  instance_type          = var.host["instance_type"]
-  vpc_security_group_ids = var.security_groups["vpc_security_group_ids"]
-  subnet_id              = var.host["subnet_id"]
-}
-
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
@@ -40,4 +33,57 @@ module "vpc" {
     Terraform = "true"
     Environment = "dev"
   }
+}
+
+resource "aws_security_group" "allow_ssh" {
+  name        = "allow_ssh"
+  description = "Allow SSH inbound traffic"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    description = "Allow SSH"
+    from_port   = 0
+    to_port     = 22
+    protocol    = "ssh"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "allow_ssh"
+  }
+}
+
+resource "aws_security_group" "allow_tcp" {
+  name        = "allow_tcp"
+  description = "Allow HTTP and HTTPS inbound traffic"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    description = "Allow HTTP"
+    from_port   = 0
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Allow HTTPs"
+    from_port   = 0
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "allow_tcp"
+  }
+}
+
+resource "aws_instance" "example" {
+  ami                    = var.host["ami"]
+  instance_type          = var.host["instance_type"]
+  vpc_security_group_ids = [module.vpc.default_security_group_id,
+                            aws_security_group.allow_ssh.id,
+                            aws_security_group.allow_tcp.id]
+  subnet_id              = module.vpc.private_subnets[0]
 }
