@@ -1,4 +1,12 @@
 terraform {
+  backend "remote" {
+    organization = "marcelo-milera"
+
+    workspaces {
+      name = "terraform-training"
+    }
+  }
+  
   required_providers {
     aws = {
       source  = "hashicorp/aws"
