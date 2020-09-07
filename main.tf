@@ -8,13 +8,21 @@ terraform {
 }
 
 provider "aws" {
-  profile                 = "marcelo-milera"
-  region                  = "sa-east-1"
+  profile = "marcelo-milera"
+  region  = "sa-east-1"
 }
 
 resource "aws_instance" "example" {
-  ami           = "ami-013dd6e24f90aa93f"
-  instance_type = "t2.micro"
-  vpc_security_group_ids = ["sg-402e5431"]
-  subnet_id              = "subnet-2bbf2970"
+  ami                    = var.host["ami"]
+  instance_type          = var.host["instance_type"]
+  vpc_security_group_ids = var.security_groups["vpc_security_group_ids"]
+  subnet_id              = var.host["subnet_id"]
+}
+
+output "host_public_dns" {
+  value = aws_instance.example.public_dns
+}
+
+output "host_private_ip" {
+  value = aws_instance.example.public_ip
 }
